@@ -24,16 +24,15 @@ export const registerOAuthDDPLoginHandler = ({ name = 'loginWithLea', identityUr
 
     const { accessToken } = options
 
-    let response
     const requestOptions = {
-      headers: { Accept: 'application/json', 'User-Agent': userAgent, Authorization: `Bearer ${accessToken}` },
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': userAgent,
+        Authorization: `Bearer ${accessToken}`
+      }
     }
 
-    try {
-      response = HTTP.get(identityUrl, requestOptions)
-    } catch (err) {
-      throw new Error(`Failed to fetch identity from lea. ${err.message}`), { response: err.response }
-    }
+    const response = HTTP.get(identityUrl, requestOptions)
 
     // we make a simple structural response validation
     const { data } = response
