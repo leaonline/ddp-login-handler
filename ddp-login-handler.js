@@ -12,7 +12,7 @@ import { HTTP } from 'meteor/http'
  * @param identityUrl {String} The url which checks the accessToken and returns the user identity or throws an error.
  */
 export const registerOAuthDDPLoginHandler = ({ name = 'loginWithLea', identityUrl }) => {
-  Accounts.accessToken(name, function (options) {
+  Accounts.registerLoginHandler(name, function (options) {
     // if the service request does not contain an accessToken or
     // lea as truthy value, we just skip processing instead of throwing
     if (!options || !options.lea || !options.accessToken) return
