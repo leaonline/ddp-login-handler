@@ -2,6 +2,11 @@ import { Accounts } from 'meteor/accounts-base'
 import { Meteor } from 'meteor/meteor'
 import { HTTP } from 'meteor/http'
 
+let userAgent = 'Meteor'
+if (Meteor.release) {
+  userAgent += `/${Meteor.release}`
+}
+
 /**
  * Registers a login handler, that allows to authenticate a user by her accessToken, that
  * she received from a previous OAuth request.
