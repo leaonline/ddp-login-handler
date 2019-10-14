@@ -1,6 +1,6 @@
 Package.describe({
   name: 'leaonline:ddp-login-handler',
-  version: '1.0.0',
+  version: '1.0.1',
   // Brief, one-line summary of the package.
   summary: 'Authenticate a remote DDP connect using an accessToken and an OAuth service',
   // URL to the Git repository containing the source code for this package.
