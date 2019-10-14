@@ -43,9 +43,6 @@ export const registerOAuthDDPLoginHandler = ({ name = 'loginWithLea', identityUr
     if ('string' !== typeof data.login) {
       throw new Error(`Unacceptable data result. Expected login, got <${data.login}> value.`)
     }
-    if ('string' !== typeof data.accessToken) {
-      throw new Error(`Unacceptable data result. Expected accessToken, got <${data.accessToken}> value.`)
-    }
 
     let userDoc = Meteor.users.findOne({ 'services.lea.id': data.id })
     if (!userDoc) {
