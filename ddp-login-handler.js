@@ -36,10 +36,10 @@ export const registerOAuthDDPLoginHandler = ({ name = 'loginWithLea', identityUr
 
     // we make a simple structural response validation
     const { data } = response
-    if ('string' !== typeof data.id) {
+    if (typeof data.id !== 'string') {
       throw new Error(`Unacceptable data result. Expected id, got <${data.id}> value.`)
     }
-    if ('string' !== typeof data.login) {
+    if (typeof data.login !== 'string') {
       throw new Error(`Unacceptable data result. Expected login, got <${data.login}> value.`)
     }
 
