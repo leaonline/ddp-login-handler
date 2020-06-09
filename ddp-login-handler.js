@@ -37,14 +37,21 @@ export const registerOAuthDDPLoginHandler = ({ name = 'loginWithLea', identityUr
     // we make a simple structural response validation
     const { data } = response
     if (typeof data.id !== 'string') {
-      console.info(`[Accounts.loginWithLea]: data=`, data)
+      console.info('[Accounts.loginWithLea]: data=', data)
       throw new Error(`Unacceptable data result. Expected id, got <${data.id}> value.`)
     }
 
     // XXX: depending on config this can be one of the following
     const username = data.login || data.username || data.email
+    if (typeof data.id !== 'string') {
+      console.info('[Accounts.loginWithLea]: data=', data)
+      throw new Error(`Unacceptable data result. Expected one of login, username or email, got <${username}> value.`)
+    }
 
     let userDoc = Meteor.users.findOne({ 'services.lea.id': data.id })
+
+    // if the given user does not exist yet, we create it as a local user
+    // TODO else update user, in case it has been changed on the accounts server
     if (!userDoc) {
       const userId = Meteor.users.insert({
         createdAt: new Date(),
