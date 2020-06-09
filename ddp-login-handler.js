@@ -37,11 +37,12 @@ export const registerOAuthDDPLoginHandler = ({ name = 'loginWithLea', identityUr
     // we make a simple structural response validation
     const { data } = response
     if (typeof data.id !== 'string') {
+      console.info(`[Accounts.loginWithLea]: data=`, data)
       throw new Error(`Unacceptable data result. Expected id, got <${data.id}> value.`)
     }
-    if (typeof data.login !== 'string') {
-      throw new Error(`Unacceptable data result. Expected login, got <${data.login}> value.`)
-    }
+
+    // XXX: depending on config this can be one of the following
+    const username = data.login || data.username || data.email
 
     let userDoc = Meteor.users.findOne({ 'services.lea.id': data.id })
     if (!userDoc) {
@@ -51,7 +52,7 @@ export const registerOAuthDDPLoginHandler = ({ name = 'loginWithLea', identityUr
           lea: {
             id: data.id,
             accessToken: accessToken,
-            username: data.login
+            username: username
           }
         }
       })
