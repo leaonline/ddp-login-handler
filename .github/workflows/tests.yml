@@ -28,7 +28,9 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node-
 
-    - run: npm install -g standard
+    - name: RUn standard lint
+      run: npm install -g standard snazzy
+      run: standard  | snazzy
 
   tests:
     name: Meteor ${{ matrix.meteor }} tests
