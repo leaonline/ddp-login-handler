@@ -28,9 +28,9 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node-
 
-    - name: Run standard lint
-      run: npm install -g standard snazzy
-      run: standard  | snazzy
+
+    - run: npm install -g standard snazzy
+    - run: standard  | snazzy
 
   tests:
     name: Meteor ${{ matrix.meteor }} tests
@@ -66,5 +66,5 @@ jobs:
         with:
           meteor-release: '2.3'
 
-      - name: Run Tests
-        run: TEST_WATCH=0 TEST_CLIENT=0 meteor test-packages ./ --once --driver-package meteortesting:mocha
+      - run: ls -ls
+      - run: TEST_WATCH=0 TEST_CLIENT=0 meteor test-packages ./ --once --driver-package meteortesting:mocha
