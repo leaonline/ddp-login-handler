@@ -1,5 +1,10 @@
 # Meteor DDP Login Handler
 
+[![Test suite](https://github.com/leaonline/ddp-login-handler/actions/workflows/tests.yml/badge.svg)](https://github.com/leaonline/ddp-login-handler/actions/workflows/tests.yml)
+[![CodeQL](https://github.com/leaonline/ddp-login-handler/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/leaonline/ddp-login-handler/actions/workflows/codeql-analysis.yml)
+[![built with Meteor](https://img.shields.io/badge/Meteor-package-green?logo=meteor&logoColor=white)](https://meteor.com)
+![GitHub](https://img.shields.io/github/license/leaonline/ddp-login-handler)
+
 Authenticate a remote DDP connect using an accessToken and a custom OAuth2 
 service.
 
