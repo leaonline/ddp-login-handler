@@ -1,29 +1,59 @@
-import { Accounts } from 'meteor/accounts-base'
 import { Meteor } from 'meteor/meteor'
-import { HTTP } from 'meteor/http'
+import { check, Match } from 'meteor/check'
 
 let userAgent = 'Meteor'
 if (Meteor.release) {
   userAgent += `/${Meteor.release}`
 }
 
+const hasProp = (obj, propName) => Object.hasOwnProperty.call(obj, propName)
+
+export const defaultDDPLoginName = 'loginWithLea'
+
 /**
- * Registers a login handler, that allows to authenticate a user by her accessToken, that
- * she received from a previous OAuth request.
+ * Returns a login handler, that allows to authenticate a user by her
+ * accessToken, that she received from a previous OAuth request.
  * Requires a valid and OAuth endpoint that validates
  * the accessToken.
  *
- * @param name {String} Name of the service, defaults to 'loginWithLea'
+ * Pass it to Accounts.registerLoginhandler
+ *
  * @param identityUrl {String} The url which checks the accessToken and returns the user identity or throws an error.
+ * @param httpGet {Function} a HTTP GET request handler, which receives the identityUrl {String} and requestoptions {Object}
+ * @param serviceName {String} name of the service property on login options, defaults to {'lea'}
+ * @param tokenName {String} name of the access token property on login options, defaults to {'accessToken'}
+ * @param dataField {String} name of the username property on the response, defaults to {'login'}
+ * @param debug {Function} a function that receives additional debug output
  */
-export const registerOAuthDDPLoginHandler = ({ name = 'loginWithLea', identityUrl }) => {
-  Accounts.registerLoginHandler(name, function (options) {
+export const getOAuthDDPLoginHandler = ({ identityUrl, httpGet, serviceName = 'lea', tokenName = 'accessToken', dataField = 'login', debug = () => {} }) => {
+  check({
+    identityUrl,
+    httpGet,
+    serviceName,
+    tokenName,
+    dataField,
+    debug
+  }, Match.ObjectIncluding({
+    identityUrl: String,
+    httpGet: Function,
+    serviceName: String,
+    tokenName: String,
+    dataField: String,
+    debug: Function
+  }))
+
+  const debugName = '[Accounts.loginWithLea]:'
+  const callDebug = (...args) => debug(debugName, ...args)
+
+  return function (options = {}) {
     // if the service request does not contain an accessToken or
-    // lea as truthy value, we just skip processing instead of throwing
-    if (!options || !options.lea || !options.accessToken) return
+    // lea (defaults) as own property, we just skip processing
+    // instead of throwing, because this may be another login service
+    if (!hasProp(options, serviceName) || !hasProp(options, tokenName)) {
+      return
+    }
 
-    const { accessToken } = options
-
+    const accessToken = options[tokenName]
     const requestOptions = {
       headers: {
         Accept: 'application/json',
@@ -32,27 +62,30 @@ export const registerOAuthDDPLoginHandler = ({ name = 'loginWithLea', identityUr
       }
     }
 
-    const response = HTTP.get(identityUrl, requestOptions)
+    callDebug('start request', { identityUrl, requestOptions })
 
     // we make a simple structural response validation
-    const { data } = response
+    const response = httpGet(identityUrl, requestOptions)
+    const { data = {} } = response
+    callDebug('response received', { data })
+
+    // accounts services provide an id fields
     if (typeof data.id !== 'string') {
-      console.info('[Accounts.loginWithLea]: data=', data)
-      throw new Error(`Unacceptable data result. Expected id, got <${data.id}> value.`)
+      throw new Error(`Invalid data result. Expected id, got <${data.id}> value.`)
     }
 
     // XXX: depending on config this can be one of the following
-    const username = data.login || data.username || data.email
-    if (typeof data.id !== 'string') {
-      console.info('[Accounts.loginWithLea]: data=', data)
-      throw new Error(`Unacceptable data result. Expected one of login, username or email, got <${username}> value.`)
+    const username = data[dataField] || data.username || data.email
+
+    if (typeof username !== 'string') {
+      throw new Error(`Invalid data result. Expected one of ${dataField}, username or email, got <${username}> value.`)
     }
 
     let userDoc = Meteor.users.findOne({ 'services.lea.id': data.id })
 
     // if the given user does not exist yet, we create it as a local user
-    // TODO else update user, in case it has been changed on the accounts server
     if (!userDoc) {
+      callDebug('no user found; insert new user')
       const userId = Meteor.users.insert({
         createdAt: new Date(),
         services: {
@@ -65,10 +98,27 @@ export const registerOAuthDDPLoginHandler = ({ name = 'loginWithLea', identityUr
       })
 
       userDoc = Meteor.users.findOne(userId)
+
+      // else update user, in case it has been changed on the accounts server
+    } else {
+      callDebug('update existing user', userDoc._id)
+      const updateDoc = { updatedAt: new Date() }
+
+      if (accessToken !== userDoc.services.lea.accessToken) {
+        updateDoc['services.lea.accessToken'] = accessToken
+      }
+
+      if (username !== userDoc.services.lea.username) {
+        updateDoc['services.lea.username'] = username
+      }
+
+      Meteor.users.update(userDoc._id, {
+        $set: updateDoc
+      })
     }
 
     // the loginHandler is expected to
     // return a { userId } structure
-    return { userId: userDoc._id }
-  })
+    return { userId: userDoc?._id }
+  }
 }
