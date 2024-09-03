@@ -45,7 +45,7 @@ export const getOAuthDDPLoginHandler = ({ identityUrl, httpGet, serviceName = 'l
   const debugName = '[Accounts.loginWithLea]:'
   const callDebug = (...args) => debug(debugName, ...args)
 
-  return function (options = {}) {
+  return async function (options = {}) {
     // if the service request does not contain an accessToken or
     // lea (defaults) as own property, we just skip processing
     // instead of throwing, because this may be another login service
@@ -65,8 +65,8 @@ export const getOAuthDDPLoginHandler = ({ identityUrl, httpGet, serviceName = 'l
     callDebug('start request', { identityUrl, requestOptions })
 
     // we make a simple structural response validation
-    const response = httpGet(identityUrl, requestOptions)
-    const { data = {} } = response
+    const response = await httpGet(identityUrl, requestOptions)
+    const { data = {} } = (response ?? {})
     callDebug('response received', { data })
 
     // accounts services provide an id fields
@@ -81,12 +81,12 @@ export const getOAuthDDPLoginHandler = ({ identityUrl, httpGet, serviceName = 'l
       throw new Error(`Invalid data result. Expected one of ${dataField}, username or email, got <${username}> value.`)
     }
 
-    let userDoc = Meteor.users.findOne({ 'services.lea.id': data.id })
+    let userDoc = await Meteor.users.findOneAsync({ 'services.lea.id': data.id })
 
     // if the given user does not exist yet, we create it as a local user
     if (!userDoc) {
       callDebug('no user found; insert new user')
-      const userId = Meteor.users.insert({
+      const userId = await Meteor.users.insertAsync({
         createdAt: new Date(),
         services: {
           lea: {
@@ -97,7 +97,7 @@ export const getOAuthDDPLoginHandler = ({ identityUrl, httpGet, serviceName = 'l
         }
       })
 
-      userDoc = Meteor.users.findOne(userId)
+      userDoc = await Meteor.users.findOneAsync(userId)
 
       // else update user, in case it has been changed on the accounts server
     } else {
@@ -112,7 +112,7 @@ export const getOAuthDDPLoginHandler = ({ identityUrl, httpGet, serviceName = 'l
         updateDoc['services.lea.username'] = username
       }
 
-      Meteor.users.update(userDoc._id, {
+      await Meteor.users.updateAsync(userDoc._id, {
         $set: updateDoc
       })
     }
