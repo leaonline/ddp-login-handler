@@ -91,8 +91,8 @@ export const getOAuthDDPLoginHandler = ({ identityUrl, httpGet, serviceName = 'l
         services: {
           lea: {
             id: data.id,
-            accessToken: accessToken,
-            username: username
+            accessToken,
+            username
           }
         }
       })

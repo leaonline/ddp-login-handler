@@ -77,7 +77,7 @@ describe(getOAuthDDPLoginHandler.name, function () {
     const identityUrl = '/' + id()
     const accessToken = id()
     const login = getOAuthDDPLoginHandler({
-      identityUrl: identityUrl,
+      identityUrl,
       httpGet: () => {
         return {}
       }
@@ -90,7 +90,7 @@ describe(getOAuthDDPLoginHandler.name, function () {
     const identityUrl = '/' + id()
     const accessToken = id()
     const login = getOAuthDDPLoginHandler({
-      identityUrl: identityUrl,
+      identityUrl,
       httpGet: () => {
         return {
           data: { id: id() }
@@ -110,7 +110,7 @@ describe(getOAuthDDPLoginHandler.name, function () {
     const userId = Random.id()
     const data = { id: id(), login: id() }
     const login = getOAuthDDPLoginHandler({
-      identityUrl: identityUrl,
+      identityUrl,
       httpGet: (url, options) => {
         expect(url).to.equal(identityUrl)
         expect(options).to.deep.equal({
@@ -130,7 +130,7 @@ describe(getOAuthDDPLoginHandler.name, function () {
       expect(insertDoc.services).to.deep.equal({
         lea: {
           id: data.id,
-          accessToken: accessToken,
+          accessToken,
           username: data.login
         }
       })
@@ -155,7 +155,7 @@ describe(getOAuthDDPLoginHandler.name, function () {
     const userId = Random.id()
     const data = { id: id(), login: id() }
     const login = getOAuthDDPLoginHandler({
-      identityUrl: identityUrl,
+      identityUrl,
       httpGet: (url, options) => {
         expect(url).to.equal(identityUrl)
         expect(options).to.deep.equal({
