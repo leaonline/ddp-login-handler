@@ -18,12 +18,14 @@ export const defaultDDPLoginName = 'loginWithLea'
  *
  * Pass it to Accounts.registerLoginhandler
  *
- * @param identityUrl {String} The url which checks the accessToken and returns the user identity or throws an error.
- * @param httpGet {Function} a HTTP GET request handler, which receives the identityUrl {String} and requestoptions {Object}
- * @param serviceName {String} name of the service property on login options, defaults to {'lea'}
- * @param tokenName {String} name of the access token property on login options, defaults to {'accessToken'}
- * @param dataField {String} name of the username property on the response, defaults to {'login'}
- * @param debug {Function} a function that receives additional debug output
+ * @async
+ * @param identityUrl {string} The url which checks the accessToken and returns the user identity or throws an error.
+ * @param httpGet {function} a HTTP GET request handler, which receives the identityUrl {String} and requestoptions {Object}
+ * @param serviceName {string} name of the service property on login options, defaults to {'lea'}
+ * @param tokenName {string} name of the access token property on login options, defaults to {'accessToken'}
+ * @param dataField {string} name of the username property on the response, defaults to {'login'}
+ * @param debug {function=} a function that receives additional debug output
+ * @returns {function(object): Promise<{userId: string}>} a login handler function, that can be passed to Accounts.registerLoginHandler
  */
 export const getOAuthDDPLoginHandler = ({ identityUrl, httpGet, serviceName = 'lea', tokenName = 'accessToken', dataField = 'login', debug = () => {} }) => {
   check({

@@ -70,7 +70,7 @@ function setupOAuth () {
 To run the tests you can use the following line on your terminal:
 
 ```bash
-$ TEST_WATCH=1 TEST_CLIENT=0 meteor test-packages ./ --driver-package meteortesting:mocha
+TEST_WATCH=1 TEST_CLIENT=0 meteor test-packages ./ --driver-package meteortesting:mocha
 ```
 
 ## LICENSE
